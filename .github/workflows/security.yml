@@ -1,0 +1,37 @@
+name: Probak eta segurtasuna
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodea eskuratu
+        uses: actions/checkout@v4
+
+      - name: Python prestatu
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependentziak eta tresnak instalatu
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pytest bandit pip-audit
+
+      - name: Probak exekutatu
+        run: pytest
+
+      - name: Kodea aztertu
+        run: bandit app.py
+
+      - name: Dependentziak auditatu
+        run: pip-audit -r requirements.txt
+
+      - name: Irudia eraiki
+        run: docker build -t devsecops-demo .
